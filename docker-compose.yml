@@ -11,3 +11,11 @@ services:
     command: python manage.py runserver 0.0.0.0:8000
     ports:
       - "8088:8000"
+
+  api-json:
+    image: clue/json-server
+    restart: always
+    volumes:
+      - ./database/:/data/
+    ports:
+      - "4040:4040"
