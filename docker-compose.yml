@@ -1,21 +1,53 @@
 version: "3.7"
 services:
-  webappvuejs:
-    hostname: webappvuejs
-    build: .
-    ports:
-      - "81:80"
-
   web-django:
     image: "musicshopdjango-web"
     command: python manage.py runserver 0.0.0.0:8000
     ports:
       - "8088:8000"
+  
+  webappvuejs:
+    hostname: webappvuejs
+    build: .
+    environment:
+      process.env.VUE_APP_RUTA_API: "http://0.0.0.0:4040"
+    links:
+      - "mydb:json-server"
+    command: npm run serve
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mydb
+    networks:
+      conexion_networks:
+        aliases:
+          - conexion1_host
 
-  api-json:
-    image: clue/json-server
-    restart: always
-    volumes:
-      - ./database/:/data/
+  
+  mydb:
+    hostname: mydb
+    build: .
+    command: Set-ExecutionPolicy -Scope CurrentUser unrestricted
+    command: json-server -H 0.0.0.0 -p 4040 --watch database/db.json
     ports:
       - "4040:4040"
+    networks:
+     conexion_networks:
+       aliases:
+        - conexion2_host
+
+networks:
+  conexion_networks:
+    name: connexion_net
+    driver: bridge
+    ipam: 
+      driver: default
+
+
+  # api-json:
+  #   image: clue/json-server
+  #   restart: always
+  #   volumes:
+  #     - ./database/:/data/
+  #   ports:
+  #     - "4040:4040"
